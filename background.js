@@ -25,6 +25,12 @@ chrome.runtime.onInstalled.addListener(() => {
             contexts: ["all"]
         });
         chrome.contextMenus.create({
+            id: "download_4days_data",
+            title: "4日分のデータをダウンロード",
+            parentId: "rakuten_data_downloader",
+            contexts: ["all"]
+        });
+        chrome.contextMenus.create({
             id: "download_week_data",
             title: "一週間分のデータをダウンロード",
             parentId: "rakuten_data_downloader",
@@ -71,6 +77,16 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
             func: downloadJSON,
             args: [startDate, endDate]
         });
+
+    } else if (info.menuItemId === "download_4days_data") {
+
+        const { startDate, endDate } = calculateDateRange(4);
+        chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: downloadJSON,
+            args: [startDate, endDate]
+        });
+
     } else if (info.menuItemId === "download_week_data") {
 
         const { startDate, endDate } = calculateDateRange(7);
@@ -131,7 +147,7 @@ function downloadJSON(startDate, endDate) {
             const url = `${baseUrl}?period=daily&device=deviceAll&startDate=${date.replace(
                 /-/g,
                 ""
-            )}&endDate=${date.replace(/-/g, "")}&recordsNumber=1000&startDateDaily=${encodeURIComponent(
+            )}&endDate=${date.replace(/-/g, "")}&recordsNumber=40000&startDateDaily=${encodeURIComponent(
                 date
             )}&endDateDaily=${encodeURIComponent(date)}&itemId=null&cycleNumber=0`;
 
@@ -155,7 +171,7 @@ function downloadJSON(startDate, endDate) {
 
                     // JSONデータをCSV形式に変換してダウンロード
                     const csvHeaders = [
-                        "自治体", "#", "ジャンル", "カタログID", "商品ID", "商品名", "商品管理番号", "商品番号", "売上", "売上件数", "売上個数", "アクセス人数", "ユニークユーザー数", "転換率", "客単価", "総購入件数", "新規購入件数", "リピート購入件数", "未購入アクセス人数", "レビュー投稿数", "レビュー総合評価（点）", "総レビュー数", "滞在時間（秒）", "直帰数", "離脱数", "離脱率", "お気に入り登録ユーザ数", "お気に入り総ユーザ数", "在庫数", "在庫0日日数"
+                        "自治体", "日付", "ジャンル", "カタログID", "商品ID", "商品名", "商品管理番号", "商品番号", "売上", "売上件数", "売上個数", "アクセス人数", "ユニークユーザー数", "転換率", "客単価", "総購入件数", "新規購入件数", "リピート購入件数", "未購入アクセス人数", "レビュー投稿数", "レビュー総合評価（点）", "総レビュー数", "滞在時間（秒）", "直帰数", "離脱数", "離脱率", "お気に入り登録ユーザ数", "お気に入り総ユーザ数", "在庫数", "在庫0日日数"
                     ];
 
                     const csvRows = data.data.map(item => {
